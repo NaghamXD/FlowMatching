@@ -21,6 +21,8 @@ def _sample_record() -> RunRecord:
         feature_cache_manifest_hashes={"train": "abc123", "val": "def456", "test": "ghi789"},
         test_top1=0.6335,
         mean_per_class_accuracy=0.61,
+        train_size=1880,
+        num_classes=47,
         best_epoch=23,
         epoch_curves=[
             {"epoch": 1, "step": 30, "train_loss": 2.1, "train_acc": 0.3, "val_loss": 2.0, "val_acc": 0.35},
@@ -52,6 +54,8 @@ def test_prototype_run_has_none_best_epoch_and_empty_curves() -> None:
         feature_cache_manifest_hashes={"train": "abc", "test": "ghi"},
         test_top1=0.5878,
         mean_per_class_accuracy=0.58,
+        train_size=1880,
+        num_classes=47,
         best_epoch=None,
         epoch_curves=[],
         predictions_path="runs/dtd_resnet18_image_prototype_full/predictions.pt",

@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pytest
 import torch
+import torch.nn.functional as F
 
 from cvlab.config.loader import load_dataclass, load_yaml
 from cvlab.config.schema import LinearProbeConfig, MethodConfig
@@ -77,6 +78,27 @@ def test_average_loss_decreases() -> None:
     first_10 = sum(r.train_loss for r in result.history[:10]) / 10
     last_10 = sum(r.train_loss for r in result.history[-10:]) / 10
     assert last_10 < first_10
+
+
+def test_train_loss_is_full_batch_final_weights_not_running_average() -> None:
+    """Decision 17: train_loss/train_acc must reflect one full-batch, no_grad pass
+    under the epoch's *final* weights -- not a running average across mini-batches
+    computed under earlier (stale) weights. With max_epochs=1, the returned model
+    IS the epoch's final weights (it's the only, hence best, epoch), so recomputing
+    the full-batch loss independently must match the recorded value exactly. This
+    would have failed under the old mini-batch running-average implementation.
+    """
+    Z, y = _separable_data(num_classes=4, per_class=10, dim=8, seed=0)  # 40 samples
+    config = LinearProbeConfig(max_epochs=1, batch_size=8)  # 5 mini-batches in the one epoch
+    model, result = train_linear_probe(Z, y, Z, y, num_classes=4, feature_dim=8, config=config, seed=0)
+
+    assert result.best_epoch == 1
+    model.eval()
+    with torch.no_grad():
+        expected_loss = F.cross_entropy(model(Z), y).item()
+        expected_acc = (model(Z).argmax(dim=1) == y).float().mean().item()
+    assert result.history[0].train_loss == pytest.approx(expected_loss, abs=1e-6)
+    assert result.history[0].train_acc == pytest.approx(expected_acc, abs=1e-6)
 
 
 def test_checkpoint_val_accuracy_equals_max_in_history() -> None:

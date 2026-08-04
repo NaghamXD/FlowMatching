@@ -19,6 +19,8 @@ cache/features/*
 !cache/features/.gitkeep
 runs/*
 !runs/.gitkeep
+# Deterministically regenerable from runs/ via `cvlab make-report` (decision 14)
+reports/
 
 # Claude Code local overrides (personal, not shared)
 .claude/settings.local.json

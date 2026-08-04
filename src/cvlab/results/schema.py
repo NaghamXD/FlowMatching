@@ -19,6 +19,11 @@ class RunRecord:
     feature_cache_manifest_hashes: dict[str, str]
     test_top1: float
     mean_per_class_accuracy: float
+    # Full official train-split size and class count (not the K-shot subset size) --
+    # lets reporting compute/assert images-per-class at K="full" without reading
+    # cached features (decision 15 in the reporting spec).
+    train_size: int
+    num_classes: int
     # None for training-free heads (ImagePrototype); an epoch index for LinearProbe.
     best_epoch: int | None
     # Empty for training-free heads; one dict per epoch (see EpochRecord) for LinearProbe.

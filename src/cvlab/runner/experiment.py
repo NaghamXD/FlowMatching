@@ -121,6 +121,8 @@ def run_single(
         feature_cache_manifest_hashes=manifest_hashes,
         test_top1=top1_accuracy(logits, y_test),
         mean_per_class_accuracy=mean_per_class_accuracy(logits, y_test, num_classes),
+        train_size=int(Z_train_full.shape[0]),
+        num_classes=num_classes,
         best_epoch=best_epoch,
         epoch_curves=epoch_curves,
         predictions_path=str(predictions_path),

@@ -14,6 +14,8 @@ def _record(run_id: str) -> RunRecord:
         feature_cache_manifest_hashes={"train": "abc"},
         test_top1=0.5,
         mean_per_class_accuracy=0.5,
+        train_size=100,
+        num_classes=5,
         best_epoch=None,
         epoch_curves=[],
         predictions_path=f"runs/{run_id}/predictions.pt",

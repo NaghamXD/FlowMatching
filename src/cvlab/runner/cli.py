@@ -1,6 +1,6 @@
 """CLI entry point. Subcommands: `extract-features`, `run-experiment`, `run-sweep`,
-`list-runs`. Argument parsing and dispatch only -- all logic lives in
-`features.extract`, `runner.experiment`, and `runner.sweep`."""
+`list-runs`, `make-report`. Argument parsing and dispatch only -- all logic lives
+in `features.extract`, `runner.experiment`, `runner.sweep`, and `reporting`."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from pathlib import Path
 from cvlab.config.loader import load_dataclass, load_yaml
 from cvlab.config.schema import DatasetConfig, EncoderConfig, MethodConfig
 from cvlab.features.extract import DEFAULT_BATCH_SIZE, extract_split
+from cvlab.reporting.report import make_report
 from cvlab.results.store import list_run_ids
 from cvlab.results.store import load as load_record
 from cvlab.runner.experiment import RunSpec, run_single
@@ -103,6 +104,13 @@ def _cmd_list_runs(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_make_report(args: argparse.Namespace) -> int:
+    written = make_report(args.runs_root, args.reports_root, args.configs_dir, args.cache_root)
+    for path in written:
+        print(path)
+    return 0
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cvlab")
     subparsers = parser.add_subparsers(dest="command")
@@ -144,6 +152,15 @@ def _build_parser() -> argparse.ArgumentParser:
     list_runs.add_argument("--runs-root", default="runs")
     list_runs.set_defaults(func=_cmd_list_runs)
 
+    report = subparsers.add_parser(
+        "make-report", help="Regenerate all Stage 1 report artifacts from the results store."
+    )
+    report.add_argument("--runs-root", default="runs")
+    report.add_argument("--reports-root", default="reports")
+    report.add_argument("--configs-dir", default=_DEFAULT_CONFIGS_DIR)
+    report.add_argument("--cache-root", default="cache/features")
+    report.set_defaults(func=_cmd_make_report)
+
     return parser
 
 
@@ -153,7 +170,8 @@ def main(argv: list[str] | None = None) -> int:
     if not getattr(args, "command", None):
         print(
             "cvlab CLI: no subcommand given. Try `cvlab extract-features --help`, "
-            "`cvlab run-experiment --help`, `cvlab run-sweep --help`, or `cvlab list-runs --help`.",
+            "`cvlab run-experiment --help`, `cvlab run-sweep --help`, `cvlab list-runs --help`, "
+            "or `cvlab make-report --help`.",
             file=sys.stderr,
         )
         return 0

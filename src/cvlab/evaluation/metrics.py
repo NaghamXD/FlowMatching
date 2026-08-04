@@ -35,13 +35,20 @@ def mean_per_class_accuracy(logits: torch.Tensor, labels: torch.Tensor, num_clas
     return valid.mean().item()
 
 
-def confusion_matrix(logits: torch.Tensor, labels: torch.Tensor, num_classes: int) -> torch.Tensor:
-    """Row-normalized confusion matrix: rows are true classes, columns predicted
-    classes. Rows for a class with at least one example sum to exactly 1; a class
-    with zero examples gets an all-zero row rather than dividing by zero."""
-    preds = logits.argmax(dim=1)
+def confusion_matrix_from_preds(preds: torch.Tensor, labels: torch.Tensor, num_classes: int) -> torch.Tensor:
+    """Row-normalized confusion matrix from already-computed predictions: rows are
+    true classes, columns predicted classes. Rows for a class with at least one
+    example sum to exactly 1; a class with zero examples gets an all-zero row
+    rather than dividing by zero. Used directly by reporting (M11), which reads
+    saved predictions from the results store rather than re-deriving them from
+    logits."""
     flat_index = labels.to(torch.long) * num_classes + preds.to(torch.long)
     counts = torch.bincount(flat_index, minlength=num_classes * num_classes)
     counts = counts.reshape(num_classes, num_classes).to(torch.float64)
     row_sums = counts.sum(dim=1, keepdim=True)
     return counts / row_sums.clamp(min=1)
+
+
+def confusion_matrix(logits: torch.Tensor, labels: torch.Tensor, num_classes: int) -> torch.Tensor:
+    """Row-normalized confusion matrix from logits (argmax'd internally)."""
+    return confusion_matrix_from_preds(logits.argmax(dim=1), labels, num_classes)

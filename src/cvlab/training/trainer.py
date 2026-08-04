@@ -5,6 +5,12 @@ Decision 13: always runs the full `max_epochs` budget -- best-val checkpoint
 selection already prevents keeping an overfit model, so early stopping would
 only change compute, not results, and would truncate the loss curves the spec
 wants as overfitting evidence. `patience` must stay unset for every Stage 1 run.
+
+Decision 17: `train_loss`/`train_acc` are evaluated once per epoch, under
+`no_grad`, over the *full* training subset with the epoch's final weights --
+not accumulated as a running average across mini-batches computed under
+different (stale) weights during the epoch. A running average is systematically
+pessimistic early in training and understates the true train/val gap.
 """
 
 from __future__ import annotations
@@ -59,8 +65,6 @@ def train_linear_probe(
     for epoch in range(1, config.max_epochs + 1):
         model.train()
         perm = torch.randperm(n, generator=shuffle_generator)
-        running_loss = 0.0
-        running_correct = 0
         for start in range(0, n, config.batch_size):
             batch_idx = perm[start : start + config.batch_size]
             zb, yb = Z_train[batch_idx], y_train[batch_idx]
@@ -72,14 +76,14 @@ def train_linear_probe(
             optimizer.step()
             step += 1
 
-            running_loss += loss.item() * zb.shape[0]
-            running_correct += (logits.argmax(dim=1) == yb).sum().item()
-
-        train_loss = running_loss / n
-        train_acc = running_correct / n
-
+        # Decision 17: evaluate train/val metrics once, under the epoch's final
+        # weights, over the full subsets -- not a mini-batch running average.
         model.eval()
         with torch.no_grad():
+            train_logits = model(Z_train)
+            train_loss = F.cross_entropy(train_logits, y_train).item()
+            train_acc = (train_logits.argmax(dim=1) == y_train).float().mean().item()
+
             val_logits = model(Z_val)
             val_loss = F.cross_entropy(val_logits, y_val).item()
             val_acc = (val_logits.argmax(dim=1) == y_val).float().mean().item()
