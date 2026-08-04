@@ -27,6 +27,9 @@ runs/*
 stage_1.pdf
 Claude Prompts.docx
 
+# Docs kept locally only, not published to the repo
+docs/
+
 # OS
 .DS_Store
 
