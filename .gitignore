@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Project data/artifacts (never commit)
+data/
+cache/features/*
+!cache/features/.gitkeep
+runs/*
+!runs/.gitkeep
+
+# Claude Code local overrides (personal, not shared)
+.claude/settings.local.json
+
+# Original spec source docs (not for the public repo -- may contain course/personal info)
+stage_1.pdf
+Claude Prompts.docx
+
+# OS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/

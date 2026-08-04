@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cvlab"
+version = "0.1.0"
+description = "CVLAB summer project: frozen-feature linear probing and image-prototype classification (Stage 1)."
+requires-python = ">=3.11"
+dependencies = [
+    "torch==2.3.1",
+    "torchvision==0.18.1",
+    "numpy==1.26.4",
+    "pyyaml==6.0.1",
+    "scipy==1.13.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.2.2",
+]
+
+[project.scripts]
+cvlab = "cvlab.runner.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"

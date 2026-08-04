@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": ["Bash"],
+    "deny": ["Bash(rm -rf:*)", "Bash(sudo:*)"]
+  },
+  "sandbox": {
+    "autoAllowBashIfSandboxed": true
+  }
+}

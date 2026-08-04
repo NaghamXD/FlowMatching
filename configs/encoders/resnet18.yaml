@@ -1,0 +1,5 @@
+name: resnet18
+checkpoint_id: IMAGENET1K_V1
+feature_dim: 512
+input_resolution: 224
+uses_registers: false

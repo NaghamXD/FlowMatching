@@ -1,0 +1,5 @@
+name: dinov2_vits14
+checkpoint_id: facebookresearch/dinov2:dinov2_vits14
+feature_dim: 384
+input_resolution: 224
+uses_registers: false
